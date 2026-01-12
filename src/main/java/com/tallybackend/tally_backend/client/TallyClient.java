@@ -28,6 +28,39 @@ public class TallyClient {
 
     }
 
+    public String fetchLedgersXml(String companyName) {
+
+        String ledgerXml = """
+                <ENVELOPE>
+                  <HEADER>
+                    <VERSION>1</VERSION>
+                    <TALLYREQUEST>Export</TALLYREQUEST>
+                    <TYPE>Collection</TYPE>
+                    <ID>Ledger</ID>
+                  </HEADER>
+                  <BODY>
+                    <DESC>
+                      <STATICVARIABLES>
+                        <SVCURRENTCOMPANY>%s</SVCURRENTCOMPANY>
+                        <SVEXPORTFORMAT>$$SysName:XML</SVEXPORTFORMAT>
+                      </STATICVARIABLES>
+                    </DESC>
+                  </BODY>
+                </ENVELOPE>
+                """.formatted(companyName);
+
+        HttpHeaders headers =  new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_XML);
+
+        HttpEntity<String> request = new HttpEntity<>(ledgerXml , headers);
+
+        return restTemplate.postForObject(
+                tallyUrl,
+                request,
+                String.class
+        );
+    }
+
 
     private static final String COMPANY_XML = """
         <ENVELOPE>

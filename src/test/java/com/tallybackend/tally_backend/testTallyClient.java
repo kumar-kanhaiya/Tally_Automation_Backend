@@ -44,7 +44,7 @@ class TallyClientTest {
                         MediaType.TEXT_XML
                 ));
 
-        String response = tallyClient.fetchCompanyXml();
+        String response = tallyClient.fetchCompanyXml("abc");
 
         assertEquals(mockXmlResponse, response);
         mockServer.verify();

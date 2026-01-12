@@ -18,10 +18,10 @@ public class CompanyService {
         this.parser = parser;
     }
 
-    public List<String> fetchAndFilterCompanies() {
-        String rawXml = tallyClient.fetchCompanyXml();
-        System.out.println(rawXml);
-        return parser.extractCompanyNames(rawXml);
-    }
+//    public List<String> fetchAndFilterCompanies() {
+////        String rawXml = tallyClient.fetchCompanyXml();
+//        System.out.println(rawXml);
+//        return parser.extractCompanyNames(rawXml);
+//    }
 }
 

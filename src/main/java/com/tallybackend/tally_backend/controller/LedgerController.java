@@ -1,10 +1,8 @@
 package com.tallybackend.tally_backend.controller;
 
 import com.tallybackend.tally_backend.service.LedgerService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import com.tallybackend.tally_backend.service.parser.LedgerParserService;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -13,15 +11,25 @@ import java.util.List;
 public class LedgerController {
 
     private final LedgerService service;
+    private final LedgerParserService ledgerService;
 
-    public LedgerController(LedgerService service){
+    public LedgerController(LedgerService service , LedgerParserService ledgerService){
         this.service = service;
+        this.ledgerService = ledgerService;
     }
 
     @GetMapping
     public List<String> getLedgers(
             @RequestParam String companyName) {
         return service.fetchLedgers(companyName);
+    }
+
+    @PostMapping(
+            consumes = "application/xml",
+            produces = "application/json"
+    )
+    public List<String> getAllLedgers(@RequestBody String xml){
+        return ledgerService.extractLedgerNames(xml);
     }
 
 }

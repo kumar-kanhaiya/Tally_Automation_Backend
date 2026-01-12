@@ -1,4 +1,5 @@
 package com.tallybackend.tally_backend.service.parser;
+import com.tallybackend.tally_backend.util.XmlSanitizer;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -15,49 +16,45 @@ import java.util.List;
 @Service
 public class LedgerParserService {
 
-        public List<String> extractLedgerNames(String xml) {
+    public List<String> extractLedgerNames(String xml) {
+        try {
+            String cleanXml = XmlSanitizer.sanitize(xml);
+
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(false);
+
+            // SECURITY
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            factory.setExpandEntityReferences(false);
+
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(
+                    new InputSource(new StringReader(cleanXml))
+            );
+
+            NodeList ledgerNodes = doc.getElementsByTagName("LEDGER");
+
             List<String> ledgers = new ArrayList<>();
 
-            try{
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                factory.setNamespaceAware(false);
+            for (int i = 0; i < ledgerNodes.getLength(); i++) {
+                Element ledger = (Element) ledgerNodes.item(i);
 
-                DocumentBuilder builder = factory.newDocumentBuilder();
-                Document doc = builder.parse(
-                        new InputSource(new StringReader(xml))
-                );
-
-                NodeList ledgersList = doc.getElementsByTagName("LEDGER");
-
-                for (int i = 0; i < ledgersList.getLength(); i++) {
-                    Element ledgerElement = (Element) ledgersList.item(i);
-
-                    String name = ledgerElement.getAttribute("NAME");
-
-                    if(name == null || name.isBlank()){
-                        NodeList nameNodes =
-                                ledgerElement.getElementsByTagName("NAME");
-
-                        if(nameNodes.getLength() > 0){
-                            name = nameNodes.item(0).getTextContent();
-                        }
-                    }
-
-                    if(name != null){
-                        name = name.trim();
-
-                        if (!name.equalsIgnoreCase("Profit & Loss")
-                                && !name.equalsIgnoreCase("Balance Sheet")) {
-                            ledgers.add(name);
-                        }
+                NodeList nameNodes = ledger.getElementsByTagName("NAME");
+                if (nameNodes.getLength() > 0) {
+                    String name = nameNodes.item(0).getTextContent();
+                    if (name != null && !name.isBlank()) {
+                        ledgers.add(name.trim());
                     }
                 }
-
-
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to parse company XML", e);
             }
 
             return ledgers;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse ledger XML", e);
         }
+    }
 }
+

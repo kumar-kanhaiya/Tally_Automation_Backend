@@ -22,6 +22,6 @@ public class LedgerService {
 
     public List<String> fetchLedgers(String companyName){
         String xml = tallyClient.fetchLedgersXml(companyName);
-        return new ArrayList<>();
+        return ledgerParserService.extractLedgerNames(xml);
     }
 }

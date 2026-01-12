@@ -1,5 +1,6 @@
 package com.tallybackend.tally_backend.service.parser;
 
+import com.tallybackend.tally_backend.util.XmlSanitizer;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -21,12 +22,20 @@ public class CompanyParserService {
         List<String> companies = new ArrayList<>();
 
         try {
+            String cleanXml = XmlSanitizer.sanitize(xml);
+
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(false);
 
+            // SECURITY HARDENING (DO NOT REMOVE)
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            factory.setExpandEntityReferences(false);
+
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(
-                    new InputSource(new StringReader(xml))
+                    new InputSource(new StringReader(cleanXml))
             );
 
             NodeList companyNodes = doc.getElementsByTagName("COMPANY");
@@ -34,25 +43,17 @@ public class CompanyParserService {
             for (int i = 0; i < companyNodes.getLength(); i++) {
                 Element companyElement = (Element) companyNodes.item(i);
 
-                // OPTION 1: Read NAME attribute
-                String name = companyElement.getAttribute("NAME");
+                String name = null;
 
-                // Fallback if attribute is missing
-                if (name == null || name.isBlank()) {
-                    NodeList nameNodes = companyElement.getElementsByTagName("NAME");
-                    if (nameNodes.getLength() > 0) {
-                        name = nameNodes.item(0).getTextContent();
-                    }
+                NodeList nameNodes = companyElement.getElementsByTagName("NAME");
+                if (nameNodes.getLength() > 0) {
+                    name = nameNodes.item(0).getTextContent();
+                } else {
+                    name = companyElement.getAttribute("NAME");
                 }
 
-                if (name != null) {
-                    name = name.trim();
-//                    companies.add(name);
-
-                    // FILTERING LOGIC
-                    if (!name.equalsIgnoreCase("")) {
-                        companies.add(name);
-                    }
+                if (name != null && !name.isBlank()) {
+                    companies.add(name.trim());
                 }
             }
 
@@ -62,5 +63,7 @@ public class CompanyParserService {
 
         return companies;
     }
+
+
 }
 

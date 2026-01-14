@@ -1,9 +1,6 @@
 package com.tallybackend.tally_backend.controller;
 
-import com.tallybackend.tally_backend.client.TallyClient;
-import com.tallybackend.tally_backend.service.CompanyService;
 import com.tallybackend.tally_backend.service.parser.CompanyParserService;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

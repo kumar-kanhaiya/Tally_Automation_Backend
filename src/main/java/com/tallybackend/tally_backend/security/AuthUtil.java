@@ -30,7 +30,7 @@ public class AuthUtil {
 
         return Jwts.builder()
                 .subject(user.getUsername())
-                .claim("userId", user.getUserId())
+                .claim("userId", user.getUserId().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + TWO_MONTHS))
                 .signWith(getSecretKey())
@@ -51,7 +51,7 @@ public class AuthUtil {
     public String determineUsernameFromOAuth2User(OAuth2User oAuth2User ,String registrationId
             ,String providerId){
         String email = oAuth2User.getAttribute("email");
-        if(email != null || !email.isBlank()){
+        if(email != null && !email.isBlank()){
             return email;
         }
 
@@ -70,7 +70,7 @@ public class AuthUtil {
             }
         };
 
-        if(providerId == null || !providerId.isBlank()){
+        if(providerId == null || providerId.isBlank()){
             log.error("Unable to determine Provider Id with Provider: {}",registrationId);
             throw new IllegalArgumentException("Unable to determine providerId for OAuth2 login");
         }

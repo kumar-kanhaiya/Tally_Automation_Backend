@@ -18,7 +18,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
-public class jwtAuthFilter extends OncePerRequestFilter {
+public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final UserRepository userRepository;
     private final AuthUtil authUtil;
@@ -31,7 +31,7 @@ public class jwtAuthFilter extends OncePerRequestFilter {
         try{
 
             final String requestToken = request.getHeader("Authorization");
-            if(requestToken != null || !requestToken.startsWith("Bearer")){
+            if(requestToken == null || !requestToken.startsWith("Bearer")){
                 filterChain.doFilter(request,response);
                 return;
             }

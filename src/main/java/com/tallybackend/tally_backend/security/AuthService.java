@@ -15,6 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -29,18 +30,28 @@ public class AuthService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
 
-    public LoginResponseDto login(LoginRequestDto loginRequestDto){
-        Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(
-                        loginRequestDto.getUsername()
-                        , loginRequestDto.getPassword()));
 
-        User user = (User) authentication.getPrincipal();
+    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequestDto.getUsername(),
+                        loginRequestDto.getPassword()
+                )
+        );
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        User user = userRepository
+                .findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalStateException("User not found"));
 
         String token = authUtil.generateAccessToken(user);
 
-        return new LoginResponseDto(token , user.getUserId());
+        return new LoginResponseDto(token, user.getUserId());
     }
+
+
 
     public User signUpInternal(SignUpRequestDto signUpRequestDto ,
                                ProviderType providerType , String providerId){
@@ -61,11 +72,12 @@ public class AuthService {
             user.setProviderName(ProviderType.EMAIL);
             user.setPassword(passwordEncoder.encode(signUpRequestDto.getPassword()));
         }
-
+//        System.out.println(user.getUserId() + " " + user.getUsername());
         return userRepository.save(user);
 
     }
 
+    @Transactional
     public SignUpResponseDto signUp(SignUpRequestDto signUpRequestDto){
         User user = signUpInternal(signUpRequestDto,ProviderType.EMAIL , null);
 
@@ -77,7 +89,7 @@ public class AuthService {
                                                                      String registrationId){
         ProviderType providerType = authUtil.getProviderTypeFromRegistrationId(registrationId);
         String providerId = authUtil.determineProviderIdFromOAuth2User(oAuth2User,registrationId);
-        User user = userRepository.findByProviderIdAndProviderType(providerId , providerType).orElse(null);
+        User user = userRepository.findByProviderIdAndProviderName(providerId , providerType).orElse(null);
 
         String email = oAuth2User.getAttribute("email");
 //        String name = oAuth2User.getAttribute("name");

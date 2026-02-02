@@ -184,6 +184,9 @@ Multi-company support
 Kanhaiya Kumar
 Aspiring Software Developer | Backend Engineer
 GitHub: https://github.com/kumar-kanhaiya
+Anuj Kumar
+Aspiring Backend Developer 
+Github: https://github.com/CraftyScripter
 
 📜 License
 

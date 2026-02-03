@@ -188,24 +188,3 @@ Anuj Kumar
 Aspiring Backend Developer 
 Github: https://github.com/CraftyScripter
 
-📜 License
-
-This project is for educational and hackathon purposes.
-
-
----
-
-### Brutal honesty check
-- ❌ No fake buzzwords  
-- ❌ No overclaiming  
-- ✅ Clear problem → solution  
-- ✅ Technical depth visible  
-- ✅ Hackathon-friendly  
-
-If you want:
-- **Shorter README**
-- **More business-oriented**
-- **Architecture diagram**
-- **API documentation section**
-
-Say it directly.
